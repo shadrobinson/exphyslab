@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>VO2 Max Lab Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column (about 66 characters) under a sticky jump bar; each test is a
+   protocol list followed by a working calculator. Arterial red = oxygen delivered,
+   venous blue = oxygen returned, used as the two signal colors throughout. */
+:root {
+  --bg: #f3f6f8;
+  --surface: #ffffff;
+  --sunk: #e8eef2;
+  --ink: #14242e;
+  --muted: #536773;
+  --line: #cbd7de;
+  --arterial: #c2262e;
+  --venous: #2c5a9e;
+  --caution-bg: #fff4d9;
+  --caution-ink: #6b4a00;
+  --good: #1f7a4d;
+  --bad: #b3261e;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1a21; --surface: #18262f; --sunk: #213440; --ink: #e6eef2; --muted: #9db0bb;
+    --line: #34495a; --arterial: #ff6b6f; --venous: #7fb0f5;
+    --caution-bg: #3a2f10; --caution-ink: #f6dc9a; --good: #5fd39a; --bad: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1a21; --surface: #18262f; --sunk: #213440; --ink: #e6eef2; --muted: #9db0bb;
+  --line: #34495a; --arterial: #ff6b6f; --venous: #7fb0f5;
+  --caution-bg: #3a2f10; --caution-ink: #f6dc9a; --good: #5fd39a; --bad: #ff8a80;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6; }
+.wrap { max-width: 44rem; margin: 0 auto; padding-inline: 18px; padding-block: 0 4rem; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.08; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.6rem, 9vw, 4.2rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.9rem, 6vw, 2.5rem); font-weight: 600; }
+h3 { font-size: 1.45rem; font-weight: 600; margin-top: 1.6rem; }
+p { margin: 0.8rem 0 0; }
+a { color: var(--venous); }
+sub { font-size: 0.7em; }
+sup.cite { font-family: var(--mono); font-size: 0.68em; line-height: 0; }
+sup.cite a { text-decoration: none; }
+ol.refs { font-size: 0.9rem; padding-left: 1.6rem; margin: 1rem 0 0; }
+ol.refs li { margin-top: 0.6rem; scroll-margin-top: 4rem; overflow-wrap: anywhere; }
+ol.refs li:target { background: var(--caution-bg); color: var(--caution-ink); }
+.eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--arterial); margin: 0 0 0.4rem; }
+header.top { padding-block: 2.4rem 1.6rem; }
+header.top .lede { font-size: 1.15rem; color: var(--muted); max-width: 36rem; }
+nav.jump { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); margin-inline: -18px; padding: 0.55rem 18px; overflow-x: auto; white-space: nowrap; }
+nav.jump a { display: inline-block; font-family: var(--mono); font-size: 0.78rem; color: var(--ink); text-decoration: none; padding: 0.35rem 0.7rem; border: 1px solid var(--line); border-radius: 999px; margin-right: 0.35rem; background: var(--surface); }
+nav.jump a:hover, nav.jump a:focus-visible { border-color: var(--arterial); color: var(--arterial); }
+:focus-visible { outline: 2px solid var(--venous); outline-offset: 2px; }
+section { padding-top: 3rem; scroll-margin-top: 3.5rem; }
+.scene { border-left: 4px solid var(--arterial); padding-left: 1rem; margin-top: 1rem; font-size: 1.08rem; }
+.breaks { background: var(--caution-bg); color: var(--caution-ink); padding: 0.9rem 1rem; margin-top: 1.2rem; border-radius: 4px; }
+.breaks strong { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 0.2rem; }
+.breaks ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
+.formula { font-family: var(--mono); font-size: 0.9rem; background: var(--sunk); padding: 0.8rem 1rem; margin-top: 1rem; overflow-x: auto; white-space: nowrap; border-radius: 4px; }
+.formula .a { color: var(--arterial); font-weight: 600; }
+.formula .v { color: var(--venous); font-weight: 600; }
+.tablebox { overflow-x: auto; margin-top: 1rem; }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 0.5rem 0.7rem 0.5rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+td.num { font-family: var(--mono); white-space: nowrap; }
+ol.steps { margin: 1rem 0 0; padding-left: 1.4rem; }
+ol.steps li { margin-top: 0.45rem; padding-left: 0.2rem; }
+ol.steps li::marker { font-family: var(--mono); color: var(--arterial); font-weight: 600; }
+ul.plain { margin: 0.8rem 0 0; padding-left: 1.2rem; }
+ul.plain li { margin-top: 0.35rem; }
+.calc { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--venous); padding: 1.1rem 1.1rem 1.2rem; margin-top: 1.4rem; border-radius: 4px; }
+.calc h4 { font-family: var(--display); font-size: 1.3rem; font-weight: 600; margin: 0; }
+.calc .note { font-size: 0.85rem; color: var(--muted); margin-top: 0.2rem; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 0.8rem; margin-top: 1rem; }
+.fields label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.82rem; color: var(--muted); min-width: 0; }
+.fields input, .fields select { font-family: var(--mono); font-size: 1rem; padding: 0.5rem 0.6rem; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink); width: 100%; }
+.result { display: flex; flex-wrap: wrap; gap: 0.6rem 1.8rem; align-items: baseline; margin-top: 1.1rem; padding-top: 1rem; border-top: 1px dashed var(--line); }
+.result .big { font-family: var(--display); font-size: 2.8rem; font-weight: 700; color: var(--arterial); line-height: 1; font-variant-numeric: tabular-nums; }
+.result .unit { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+.result .side { font-family: var(--mono); font-size: 0.85rem; color: var(--ink); }
+.work { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); margin-top: 0.7rem; overflow-wrap: anywhere; }
+.warn { color: var(--bad); font-size: 0.9rem; margin-top: 0.6rem; font-weight: 700; }
+#ychart { margin-top: 1rem; }
+#ychart svg { display: block; max-width: 100%; }
+.quiz .q { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1rem; margin-top: 1rem; }
+.quiz .q p { margin: 0 0 0.6rem; font-weight: 700; }
+.quiz button { display: block; width: 100%; text-align: left; font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 0.55rem 0.7rem; margin-top: 0.4rem; cursor: pointer; }
+.quiz button:hover { border-color: var(--venous); }
+.quiz button.right { border-color: var(--good); color: var(--good); font-weight: 700; }
+.quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+.quiz .fb { font-size: 0.92rem; margin-top: 0.6rem; color: var(--muted); }
+footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow"><a href="../" style="color:inherit">&larr; All lab guides</a></p>
+  <h1>Estimating V&#775;O<sub>2</sub> max without going to max</h1>
+  <p class="lede">Read this before lab. It covers what V&#775;O<sub>2</sub> is, why the maximum matters, and how the three submaximal tests we run turn a heart rate into an estimate.</p>
+</header>
+
+<nav class="jump" aria-label="Jump to section">
+  <a href="#what">What it is</a><a href="#why">Why we care</a><a href="#max">The max</a><a href="#notmax">Why not max</a><a href="#submax">Submax logic</a><a href="#astrand">Åstrand</a><a href="#ymca">YMCA</a><a href="#step">Step test</a><a href="#watch">Watches</a><a href="#check">Self-check</a><a href="#refs">References</a>
+</nav>
+
+<section id="what">
+  <p class="eyebrow">Start here</p>
+  <h2>What V&#775;O<sub>2</sub> is</h2>
+  <p class="scene">Two people climb the same four flights of stairs at the same pace. At the top, one is chatting and the other is bent over, breathing hard. They did the same work. The difference is how close that work came to the most oxygen each body can take in and use.</p>
+  <p>V&#775;O<sub>2</sub> is the volume of oxygen your body uses per minute. The dot over the V means "per minute," a rate. Sitting still, you use a small amount. Climbing stairs, your muscles demand more, so you breathe harder, your heart beats faster, and V&#775;O<sub>2</sub> rises to match the work.</p>
+  <p>Oxygen has to travel a whole chain to be used: lungs load it into blood, the heart pumps that blood, and the working muscle pulls the oxygen out. That chain is summed up in one equation, the Fick equation.</p>
+  <div class="formula">V&#775;O<sub>2</sub> = <span class="a">cardiac output</span> × <span class="v">a-vO<sub>2</sub> difference</span></div>
+  <p><span style="color:var(--arterial);font-weight:700">Cardiac output</span> is how much blood the heart delivers each minute (heart rate × stroke volume). The <span style="color:var(--venous);font-weight:700">a-vO<sub>2</sub> difference</span> is how much oxygen the muscles take out of each unit of blood, the gap between arterial blood going in and venous blood coming back.<sup class="cite"><a href="#ref1">1</a></sup></p>
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Typical young adult</th><th>Cardiac output</th><th>a-vO<sub>2</sub> diff</th><th>V&#775;O<sub>2</sub></th></tr></thead>
+      <tbody>
+        <tr><td>Sitting at rest</td><td class="num">5 L/min</td><td class="num">5 mL per 100 mL</td><td class="num">0.25 L/min</td></tr>
+        <tr><td>Maximal exercise</td><td class="num">20 L/min</td><td class="num">15 mL per 100 mL</td><td class="num">3.0 L/min</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Breaking down cardiac output</h3>
+  <p class="scene">Stand up, walk, then break into a jog. Your heart responds in two ways at once: it beats faster, and it pushes out more blood with each beat.</p>
+  <div class="formula"><span class="a">Cardiac output (Q&#775;)</span> = heart rate × stroke volume</div>
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Typical young adult</th><th>Heart rate</th><th>Stroke volume</th><th>Cardiac output</th></tr></thead>
+      <tbody>
+        <tr><td>Sitting at rest</td><td class="num">70 bpm</td><td class="num">70 mL</td><td class="num">about 5 L/min</td></tr>
+        <tr><td>Maximal exercise</td><td class="num">195 bpm</td><td class="num">105 mL</td><td class="num">about 20 L/min</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The two do not rise together the whole way. In most people stroke volume climbs early and then levels off, at roughly 40 to 60 percent of V&#775;O<sub>2</sub> max. From that point to maximum, the only way to deliver more blood is a faster heart rate.<sup class="cite"><a href="#ref1">1</a></sup></p>
+  <p>This is why we can use heart rate alone. Once stroke volume has leveled off, heart rate tracks cardiac output, and cardiac output tracks V&#775;O<sub>2</sub>. Stroke volume is hard to measure in a teaching lab. Heart rate takes two fingers and a clock. It is also why each test below asks for a heart rate above about 110 to 125 bpm: lower than that, stroke volume is still changing and heart rate is a poor stand-in.</p>
+  <div class="breaks"><strong>Where this breaks down</strong>The plateau is not universal. In endurance-trained athletes, stroke volume often keeps rising all the way to maximum.<sup class="cite"><a href="#ref7">7</a>, <a href="#ref8">8</a></sup> Each added heartbeat then delivers more oxygen than a straight line predicts, so a test that extends the line from submaximal heart rates tends to underestimate athletes.</div>
+  <h3>Two ways to report it</h3>
+  <ul class="plain">
+    <li><strong>Absolute, in L/min.</strong> Total oxygen used. Best for non-weight-bearing work like cycling or rowing, and for calculating energy cost.</li>
+    <li><strong>Relative, in mL/kg/min.</strong> Divided by body mass. Best for comparing people of different sizes and for weight-bearing work like running.</li>
+    <li><strong>METs.</strong> One MET is resting V&#775;O<sub>2</sub>, set at 3.5 mL/kg/min. A 10-MET activity uses ten times resting oxygen.</li>
+  </ul>
+</section>
+
+<section id="why">
+  <p class="eyebrow">Physiology and energy</p>
+  <h2>Why we care</h2>
+  <p>Muscle runs on ATP. For anything longer than a couple of minutes, almost all of that ATP is made aerobically, in the mitochondria, with oxygen as the final step. So oxygen use is a direct readout of aerobic energy production: for every liter of oxygen consumed, the body releases roughly 5 kcal.<sup class="cite"><a href="#ref1">1</a></sup></p>
+  <p>That link is why one measurement tells us so much. If we know V&#775;O<sub>2</sub>, we know how hard the aerobic system is working, how many calories an activity costs, and how the heart, lungs, blood, and muscle are performing together.</p>
+  <div class="breaks"><strong>Where this breaks down</strong>The 5 kcal per liter figure shifts a little with the fuel mix (about 4.7 for fat, about 5.05 for carbohydrate). And V&#775;O<sub>2</sub> only counts aerobic energy. In a sprint or the first seconds of hard work, phosphocreatine and glycolysis supply energy that oxygen uptake does not show.</div>
+</section>
+
+<section id="max">
+  <p class="eyebrow">The ceiling</p>
+  <h2>What the max tells us</h2>
+  <p>Keep raising the workload and V&#775;O<sub>2</sub> keeps rising, until it stops. That ceiling is V&#775;O<sub>2</sub> max: the highest rate at which a person can take in, deliver, and use oxygen. It is the single best measure of cardiorespiratory fitness.<sup class="cite"><a href="#ref1">1</a>, <a href="#ref2">2</a></sup></p>
+  <ul class="plain">
+    <li><strong>Health.</strong> Low cardiorespiratory fitness is a strong predictor of cardiovascular disease and early death.</li>
+    <li><strong>Performance.</strong> It sets the upper limit for endurance events, though it does not decide the winner on its own.</li>
+    <li><strong>Exercise prescription.</strong> Training intensities are set as a percentage of it.</li>
+    <li><strong>Tracking change.</strong> Retesting shows whether a training program is working.</li>
+  </ul>
+  <p>In a true max test the client exercises to exhaustion while a metabolic cart measures expired air. We accept the result as a real max when we see signs such as a plateau in V&#775;O<sub>2</sub> despite a higher workload, a respiratory exchange ratio of 1.10 or above, heart rate near the age-predicted max, and a very high RPE.<sup class="cite"><a href="#ref1">1</a>, <a href="#ref2">2</a></sup></p>
+  <div class="breaks"><strong>Where this breaks down</strong>Many people stop before showing a clear plateau, so the highest value recorded is often reported as "V&#775;O<sub>2</sub> peak" instead. And two athletes with the same max can perform very differently, because lactate threshold and movement economy also matter.</div>
+</section>
+
+<section id="notmax">
+  <p class="eyebrow">The practical problem</p>
+  <h2>Why the max test is not always appropriate</h2>
+  <p class="scene">A 58-year-old who has not exercised in years signs up at your facility. You want to know their fitness level. Putting them on a treadmill and pushing them to exhaustion on day one is not the right first move.</p>
+  <ul class="plain">
+    <li><strong>Risk.</strong> Maximal effort carries more risk for older, deconditioned, or clinical clients and may call for medical clearance and supervision.</li>
+    <li><strong>Equipment and cost.</strong> A metabolic cart is expensive and needs calibration and a trained operator.</li>
+    <li><strong>Time.</strong> One person at a time, with setup and recovery.</li>
+    <li><strong>Motivation.</strong> The result is only a max if the client truly goes to max. Many will not or cannot.</li>
+    <li><strong>Discomfort.</strong> A bad first experience can put a new client off exercise.</li>
+  </ul>
+  <p>Submaximal tests trade some accuracy for safety, speed, and low cost. That trade is usually worth it.<sup class="cite"><a href="#ref2">2</a></sup></p>
+</section>
+
+<section id="submax">
+  <p class="eyebrow">The shared idea</p>
+  <h2>How a submax test works</h2>
+  <p>During steady aerobic exercise, heart rate and V&#775;O<sub>2</sub> rise together in a nearly straight line. A fitter person does the same workload at a lower heart rate. So if we measure heart rate at a known workload, we can predict where that line would end up at maximum.<sup class="cite"><a href="#ref1">1</a>, <a href="#ref2">2</a></sup></p>
+  <p>Every test below uses that one idea. They differ in the equipment and in how they get from heart rate to a number.</p>
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Method</th><th>You measure</th><th>How it predicts</th></tr></thead>
+      <tbody>
+        <tr><td>Åstrand-Rhyming bike</td><td>One steady-state HR at one workload</td><td>Nomogram built from population averages</td></tr>
+        <tr><td>YMCA bike</td><td>HR at two or more workloads</td><td>Extends the client's own line to predicted max HR</td></tr>
+        <tr><td>McArdle step</td><td>Recovery HR after 3 min of stepping</td><td>Regression equation from college students</td></tr>
+        <tr><td>Smart watch</td><td>HR against pace during daily activity</td><td>Proprietary algorithm</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="breaks"><strong>Assumptions every submax test makes</strong>
+    <ul>
+      <li>Heart rate reached a true steady state at each workload.</li>
+      <li>The HR to V&#775;O<sub>2</sub> line stays straight all the way to max. It bends in endurance athletes whose stroke volume keeps rising, which is one likely reason they are underestimated.<sup class="cite"><a href="#ref7">7</a>, <a href="#ref8">8</a></sup></li>
+      <li>Max heart rate is what the age formula says. Real people vary by 10 to 12 beats per minute either way.</li>
+      <li>Everyone uses the same oxygen for the same workload.</li>
+      <li>Nothing else is moving heart rate: caffeine, heat, nerves, dehydration, illness, or medications such as beta blockers.</li>
+    </ul>
+    Because of these, expect an individual estimate to be off by roughly 10 to 15 percent. Treat the number as a range and use it to track change in the same person over time.<sup class="cite"><a href="#ref1">1</a>, <a href="#ref2">2</a></sup>
+  </div>
+</section>
+
+<section id="astrand">
+  <p class="eyebrow">Test 1 · cycle ergometer · single stage</p>
+  <h2>Åstrand-Rhyming</h2>
+  <p>One workload, six minutes. The goal is a steady heart rate between 125 and 170 bpm.<sup class="cite"><a href="#ref3">3</a>, <a href="#ref2">2</a></sup></p>
+  <ol class="steps">
+    <li>Set the seat so the knee is slightly bent at the bottom of the pedal stroke. Client pedals at 50 rpm.</li>
+    <li>Choose a workload. Common starting points: 300 to 600 kgm/min for unconditioned clients, 600 to 900 for conditioned clients, with the lower end for women and the higher end for men.</li>
+    <li>Ride for 6 minutes. Record heart rate at the end of minute 5 and minute 6.</li>
+    <li>If the two heart rates are within 5 bpm of each other and between 125 and 170, average them. That is your steady-state HR.</li>
+    <li>If they differ by more than 5 bpm, keep riding one minute at a time until they agree. If HR is under 125 after 6 minutes, raise the workload and ride another 6 minutes.</li>
+    <li>Read V&#775;O<sub>2</sub> max from the nomogram (or use the equation below), then multiply by the age correction factor.<sup class="cite"><a href="#ref4">4</a></sup></li>
+  </ol>
+  <div class="calc">
+    <h4>Åstrand-Rhyming calculator</h4>
+    <p class="note">Example values are filled in. Replace them with your data. Assumes a Monark-style bike at 50 rpm.</p>
+    <div class="fields">
+      <label for="a-sex">Sex<select id="a-sex"><option value="m">Male</option><option value="f">Female</option></select></label>
+      <label for="a-age">Age (years)<input id="a-age" type="number" inputmode="decimal" value="21" min="15" max="80"></label>
+      <label for="a-mass">Body mass (kg)<input id="a-mass" type="number" inputmode="decimal" value="75" min="30" max="200" step="0.1"></label>
+      <label for="a-kp">Resistance (kp)<input id="a-kp" type="number" inputmode="decimal" value="2.5" min="0.5" max="7" step="0.5"></label>
+      <label for="a-hr">Steady-state HR (bpm)<input id="a-hr" type="number" inputmode="decimal" value="148" min="80" max="210"></label>
+    </div>
+    <div class="result">
+      <div><span class="big" id="a-out">–</span> <span class="unit">mL/kg/min</span></div>
+      <div class="side" id="a-side"></div>
+    </div>
+    <p class="warn" id="a-warn" hidden></p>
+    <p class="work" id="a-work"></p>
+  </div>
+  <div class="formula">Men: V&#775;O<sub>2</sub>max (L/min) = (0.00212 × W + 0.299) ÷ (0.769 × HR − 48.5) × 100<br>Women: V&#775;O<sub>2</sub>max (L/min) = (0.00193 × W + 0.326) ÷ (0.769 × HR − 56.1) × 100<br>W in kgm/min · then × age factor · then × 1000 ÷ body mass</div>
+  <div class="breaks"><strong>Where this breaks down</strong>The whole estimate rests on a single heart rate, so anything that nudges HR that day moves the result. The nomogram was built on young, fairly fit adults, which is why older clients need the age correction.</div>
+</section>
+
+<section id="ymca">
+  <p class="eyebrow">Test 2 · cycle ergometer · multistage</p>
+  <h2>YMCA bike protocol</h2>
+  <p>Two to four 3-minute stages. Instead of relying on population averages, this test plots the client's own heart rate line and extends it.<sup class="cite"><a href="#ref5">5</a>, <a href="#ref2">2</a></sup></p>
+  <ol class="steps">
+    <li>Client pedals at 50 rpm. Stage 1 is always 0.5 kp (150 kgm/min) for 3 minutes.</li>
+    <li>Record HR in the last 15 to 30 seconds of minutes 2 and 3. If they differ by more than 5 bpm, add a minute.</li>
+    <li>Use the stage 1 heart rate to set stage 2 (table below). Each later stage adds 0.5 kp.</li>
+    <li>Continue until you have two stages with steady HR between 110 bpm and 85 percent of age-predicted max.</li>
+    <li>Plot those two points, HR against workload. Extend the line to age-predicted max HR (220 − age) and read the workload there.</li>
+    <li>Convert that max workload to V&#775;O<sub>2</sub> with the ACSM cycling equation.<sup class="cite"><a href="#ref2">2</a></sup></li>
+  </ol>
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>HR at end of stage 1</th><th>Stage 2</th><th>Stage 3</th><th>Stage 4</th></tr></thead>
+      <tbody>
+        <tr><td class="num">under 80</td><td class="num">2.5 kp</td><td class="num">3.0 kp</td><td class="num">3.5 kp</td></tr>
+        <tr><td class="num">80 to 89</td><td class="num">2.0 kp</td><td class="num">2.5 kp</td><td class="num">3.0 kp</td></tr>
+        <tr><td class="num">90 to 100</td><td class="num">1.5 kp</td><td class="num">2.0 kp</td><td class="num">2.5 kp</td></tr>
+        <tr><td class="num">over 100</td><td class="num">1.0 kp</td><td class="num">1.5 kp</td><td class="num">2.0 kp</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="calc">
+    <h4>YMCA calculator and plot</h4>
+    <p class="note">Example values are filled in. Enter your two qualifying stages (HR between 110 and 85 percent of max).</p>
+    <div class="fields">
+      <label for="y-age">Age (years)<input id="y-age" type="number" inputmode="decimal" value="21" min="15" max="80"></label>
+      <label for="y-mass">Body mass (kg)<input id="y-mass" type="number" inputmode="decimal" value="75" min="30" max="200" step="0.1"></label>
+      <label for="y-kp1">First stage (kp)<input id="y-kp1" type="number" inputmode="decimal" value="2.0" min="0.5" max="7" step="0.5"></label>
+      <label for="y-hr1">First stage HR (bpm)<input id="y-hr1" type="number" inputmode="decimal" value="122" min="80" max="210"></label>
+      <label for="y-kp2">Second stage (kp)<input id="y-kp2" type="number" inputmode="decimal" value="2.5" min="0.5" max="7" step="0.5"></label>
+      <label for="y-hr2">Second stage HR (bpm)<input id="y-hr2" type="number" inputmode="decimal" value="138" min="80" max="210"></label>
+    </div>
+    <div id="ychart" role="img" aria-label="Plot of heart rate against workload with the line extended to age-predicted maximum heart rate"></div>
+    <div class="result">
+      <div><span class="big" id="y-out">–</span> <span class="unit">mL/kg/min</span></div>
+      <div class="side" id="y-side"></div>
+    </div>
+    <p class="warn" id="y-warn" hidden></p>
+    <p class="work" id="y-work"></p>
+  </div>
+  <div class="formula">V&#775;O<sub>2</sub>max (mL/kg/min) = 1.8 × max workload (kgm/min) ÷ body mass (kg) + 7<br>Workload (kgm/min) = kp × 6 m × rpm, so at 50 rpm: kp × 300</div>
+  <div class="breaks"><strong>Where this breaks down</strong>The line is extended to 220 − age. If the client's real max HR is 12 beats higher or lower, the endpoint moves and so does the estimate. Change the age in the calculator by a few years to see how much. Two points close together also make an unstable line: a 3-beat counting error can swing the slope.</div>
+</section>
+
+<section id="step">
+  <p class="eyebrow">Test 3 · step bench · recovery heart rate</p>
+  <h2>McArdle (Queens College) step test</h2>
+  <p>Three minutes of stepping, then one heart rate count. No bike, and a whole class can test at once. Here a fitter person shows a lower heart rate right after the same work.<sup class="cite"><a href="#ref6">6</a>, <a href="#ref1">1</a></sup></p>
+  <ol class="steps">
+    <li>Use a 16.25 inch (41.3 cm) step.</li>
+    <li>Set the metronome: 96 beats per minute for men (24 steps per minute), 88 for women (22 steps per minute). Each step cycle is four beats: up, up, down, down.</li>
+    <li>Step for exactly 3 minutes.</li>
+    <li>Stop and stay standing. Starting 5 seconds after the last step, count the pulse for 15 seconds (from second 5 to second 20).</li>
+    <li>Multiply the count by 4 to get recovery HR in bpm, then use the equation.</li>
+  </ol>
+  <div class="calc">
+    <h4>Step test calculator</h4>
+    <p class="note">Example values are filled in.</p>
+    <div class="fields">
+      <label for="s-sex">Sex<select id="s-sex"><option value="m">Male</option><option value="f">Female</option></select></label>
+      <label for="s-count">15-second pulse count<input id="s-count" type="number" inputmode="decimal" value="39" min="15" max="55"></label>
+    </div>
+    <div class="result">
+      <div><span class="big" id="s-out">–</span> <span class="unit">mL/kg/min</span></div>
+      <div class="side" id="s-side"></div>
+    </div>
+    <p class="work" id="s-work"></p>
+  </div>
+  <div class="formula">Men: V&#775;O<sub>2</sub>max = 111.33 − (0.42 × HR)<br>Women: V&#775;O<sub>2</sub>max = 65.81 − (0.1847 × HR)</div>
+  <div class="breaks"><strong>Where this breaks down</strong>Heart rate drops fast after exercise, so starting the count a few seconds late gives a lower HR and a falsely high estimate. One miscounted beat becomes 4 bpm. A fixed step height is harder for shorter people, and the equations came from college-age students, so they fit other ages less well.</div>
+</section>
+
+<section id="watch">
+  <p class="eyebrow">Option 4 · the one already on your wrist</p>
+  <h2>Smart watches</h2>
+  <p>Most fitness watches report a V&#775;O<sub>2</sub> max or "cardio fitness" number. They use the same submax idea: the watch compares your heart rate to your pace during outdoor walks or runs with GPS. Holding a faster pace at a lower heart rate reads as higher fitness.</p>
+  <ul class="plain">
+    <li><strong>Useful for:</strong> trends over weeks and months in the same person, with no test session at all.</li>
+    <li><strong>Less useful for:</strong> a single precise value, or comparing two people wearing different brands.</li>
+  </ul>
+  <div class="breaks"><strong>Where this breaks down</strong>
+    <ul>
+      <li>Wrist optical sensors misread heart rate with a loose band, arm motion, cold skin, or tattoos.</li>
+      <li>Most watches estimate max HR from age unless you enter a measured value.</li>
+      <li>Hills, wind, heat, trails, and treadmill use all distort the pace-to-HR comparison.</li>
+      <li>The algorithms are proprietary, so you cannot check the math the way you can in the three tests above.</li>
+      <li>Validation studies generally find watches lean toward overestimating less fit users and underestimating very fit ones.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="check" class="quiz">
+  <p class="eyebrow">Before you come to lab</p>
+  <h2>Self-check</h2>
+  <div id="quiz"></div>
+</section>
+
+<section id="refs">
+  <p class="eyebrow">Sources</p>
+  <h2>References</h2>
+  <ol class="refs">
+    <li id="ref1">McArdle WD, Katch FI, Katch VL. <em>Exercise Physiology: Nutrition, Energy, and Human Performance</em>. 9th ed. Wolters Kluwer; 2023.</li>
+    <li id="ref2">American College of Sports Medicine. <em>ACSM's Guidelines for Exercise Testing and Prescription</em>. 12th ed. Wolters Kluwer; 2025.</li>
+    <li id="ref3">Åstrand P-O, Ryhming I. A nomogram for calculation of aerobic capacity (physical fitness) from pulse rate during submaximal work. <em>J Appl Physiol</em>. 1954;7(2):218-221.</li>
+    <li id="ref4">Åstrand I. Aerobic work capacity in men and women with special reference to age. <em>Acta Physiol Scand Suppl</em>. 1960;49(169):1-92.</li>
+    <li id="ref5">Golding LA, ed. <em>YMCA Fitness Testing and Assessment Manual</em>. 4th ed. Human Kinetics; 2000.</li>
+    <li id="ref6">McArdle WD, Katch FI, Pechar GS, Jacobson L, Ruck S. Reliability and interrelationships between maximal oxygen intake, physical work capacity and step-test scores in college women. <em>Med Sci Sports</em>. 1972;4(4):182-186.</li>
+    <li id="ref7">Gledhill N, Cox D, Jamnik R. Endurance athletes' stroke volume does not plateau: major advantage is diastolic function. <em>Med Sci Sports Exerc</em>. 1994;26(9):1116-1121.</li>
+    <li id="ref8">Zhou B, Conlee RK, Jensen R, Fellingham GW, George JD, Fisher AG. Stroke volume does not plateau during graded exercise in elite male distance runners. <em>Med Sci Sports Exerc</em>. 2001;33(11):1849-1854.</li>
+  </ol>
+</section>
+
+<footer>Draft study guide for lab preparation. Calculators use the standard published equations; your lab manual and instructor are the final word on protocol details and norms.</footer>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var num = function (id) { return parseFloat($(id).value); };
+  var f1 = function (x) { return x.toFixed(1); };
+
+  var AGE = [[15,1.10],[25,1.00],[35,0.87],[40,0.83],[45,0.78],[50,0.75],[55,0.71],[60,0.68],[65,0.65]];
+  function ageFactor(age) {
+    if (age <= AGE[0][0]) return AGE[0][1];
+    for (var i = 1; i < AGE.length; i++) {
+      if (age <= AGE[i][0]) {
+        var a = AGE[i - 1], b = AGE[i];
+        return a[1] + (b[1] - a[1]) * (age - a[0]) / (b[0] - a[0]);
+      }
+    }
+    return AGE[AGE.length - 1][1];
+  }
+
+  function astrand() {
+    var sex = $('a-sex').value, age = num('a-age'), mass = num('a-mass'), kp = num('a-kp'), hr = num('a-hr');
+    var warn = $('a-warn');
+    if (!(age > 0 && mass > 0 && kp > 0 && hr > 0)) { $('a-out').textContent = '–'; $('a-side').textContent = ''; $('a-work').textContent = ''; warn.hidden = true; return; }
+    var W = kp * 300;
+    var raw = sex === 'm' ? (0.00212 * W + 0.299) / (0.769 * hr - 48.5) * 100 : (0.00193 * W + 0.326) / (0.769 * hr - 56.1) * 100;
+    var af = ageFactor(age), abs = raw * af, rel = abs * 1000 / mass;
+    $('a-out').textContent = f1(rel);
+    $('a-side').textContent = abs.toFixed(2) + ' L/min · ' + f1(rel / 3.5) + ' METs';
+    $('a-work').textContent = 'Workload ' + W + ' kgm/min (' + Math.round(W / 6.12) + ' W) → ' + raw.toFixed(2) + ' L/min uncorrected × age factor ' + af.toFixed(2) + ' = ' + abs.toFixed(2) + ' L/min';
+    if (hr < 125 || hr > 170) { warn.hidden = false; warn.textContent = hr < 125 ? 'HR is below 125 bpm, outside the valid range. Raise the workload and ride another 6 minutes.' : 'HR is above 170 bpm, outside the valid range. The workload was too high for this test.'; }
+    else warn.hidden = true;
+  }
+
+  function svgEl(tag, attrs, text) {
+    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function ymca() {
+    var age = num('y-age'), mass = num('y-mass'), w1 = num('y-kp1') * 300, h1 = num('y-hr1'), w2 = num('y-kp2') * 300, h2 = num('y-hr2');
+    var warn = $('y-warn'), box = $('ychart');
+    var ok = age > 0 && mass > 0 && w1 > 0 && w2 > w1 && h1 > 0 && h2 > h1;
+    var hrmax = 220 - age;
+    if (!ok || h2 >= hrmax) {
+      $('y-out').textContent = '–'; $('y-side').textContent = ''; $('y-work').textContent = ''; box.textContent = '';
+      warn.hidden = false; warn.textContent = 'The second stage needs a higher workload and a higher heart rate than the first, and both heart rates must be below age-predicted max.';
+      return;
+    }
+    var slope = (w2 - w1) / (h2 - h1), wmax = w2 + slope * (hrmax - h2), rel = 1.8 * wmax / mass + 7;
+    $('y-out').textContent = f1(rel);
+    $('y-side').textContent = (rel * mass / 1000).toFixed(2) + ' L/min · ' + f1(rel / 3.5) + ' METs';
+    $('y-work').textContent = 'Max HR 220 − ' + age + ' = ' + hrmax + ' bpm → line reaches ' + Math.round(wmax) + ' kgm/min (' + Math.round(wmax / 6.12) + ' W) → 1.8 × ' + Math.round(wmax) + ' ÷ ' + mass + ' + 7';
+    var cap = Math.round(0.85 * hrmax), msgs = [];
+    if (h1 < 110) msgs.push('First stage HR is below 110 bpm.');
+    if (h2 > cap) msgs.push('Second stage HR is above 85 percent of max (' + cap + ' bpm).');
+    warn.hidden = msgs.length === 0; warn.textContent = msgs.join(' ') + (msgs.length ? ' Use stages inside the 110 to ' + cap + ' range.' : '');
+
+    // chart
+    var Wd = Math.max(280, box.clientWidth), Hd = Math.round(Math.max(230, Math.min(340, Wd * 0.58)));
+    var L = 50, R = 14, T = 12, B = 40;
+    var x0 = Math.floor((h1 - 15) / 10) * 10, x1 = Math.ceil((hrmax + 6) / 10) * 10;
+    var ystep = wmax * 1.25 > 2400 ? 600 : 300, y1 = Math.ceil(wmax * 1.25 / ystep) * ystep;
+    var X = function (h) { return L + (h - x0) / (x1 - x0) * (Wd - L - R); };
+    var Y = function (w) { return Hd - B - w / y1 * (Hd - T - B); };
+    var css = getComputedStyle(document.documentElement);
+    var c = function (n) { return css.getPropertyValue(n).trim(); };
+    var ink = c('--ink'), muted = c('--muted'), line = c('--line'), art = c('--arterial'), ven = c('--venous');
+    var svg = svgEl('svg', { width: Wd, height: Hd, viewBox: '0 0 ' + Wd + ' ' + Hd });
+    var font = 'font-family:JetBrains Mono,ui-monospace,monospace;font-size:11px';
+    for (var w = 0; w <= y1; w += ystep) {
+      svg.appendChild(svgEl('line', { x1: L, x2: Wd - R, y1: Y(w), y2: Y(w), stroke: line, 'stroke-width': 1 }));
+      svg.appendChild(svgEl('text', { x: L - 6, y: Y(w) + 4, 'text-anchor': 'end', fill: muted, style: font }, w));
+    }
+    var xs = Wd < 420 ? 20 : 10;
+    for (var h = Math.ceil(x0 / xs) * xs; h <= x1; h += xs) {
+      svg.appendChild(svgEl('line', { x1: X(h), x2: X(h), y1: Hd - B, y2: Hd - B + 4, stroke: muted, 'stroke-width': 1 }));
+      svg.appendChild(svgEl('text', { x: X(h), y: Hd - B + 16, 'text-anchor': 'middle', fill: muted, style: font }, h));
+    }
+    svg.appendChild(svgEl('text', { x: (L + Wd - R) / 2, y: Hd - 4, 'text-anchor': 'middle', fill: muted, style: font }, 'Heart rate (bpm)'));
+    svg.appendChild(svgEl('text', { x: L, y: T + 2, 'text-anchor': 'start', fill: muted, style: font }, 'kgm/min'));
+    // HR max marker
+    svg.appendChild(svgEl('line', { x1: X(hrmax), x2: X(hrmax), y1: T, y2: Hd - B, stroke: ven, 'stroke-width': 1.5, 'stroke-dasharray': '4 4' }));
+    svg.appendChild(svgEl('text', { x: X(hrmax) - 6, y: Hd - B - 8, 'text-anchor': 'end', fill: ven, style: font }, 'predicted max HR ' + hrmax));
+    // measured + extrapolated line
+    svg.appendChild(svgEl('line', { x1: X(h1), y1: Y(w1), x2: X(h2), y2: Y(w2), stroke: ink, 'stroke-width': 2.5 }));
+    svg.appendChild(svgEl('line', { x1: X(h2), y1: Y(w2), x2: X(hrmax), y2: Y(wmax), stroke: art, 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
+    [[h1, w1], [h2, w2]].forEach(function (p) {
+      svg.appendChild(svgEl('circle', { cx: X(p[0]), cy: Y(p[1]), r: 5, fill: ink }));
+    });
+    svg.appendChild(svgEl('circle', { cx: X(hrmax), cy: Y(wmax), r: 6, fill: art }));
+    svg.appendChild(svgEl('text', { x: X(hrmax) - 10, y: Y(wmax) - 9, 'text-anchor': 'end', fill: art, style: font + ';font-weight:600' }, 'predicted max ' + Math.round(wmax)));
+    svg.appendChild(svgEl('text', { x: X(h1) + 9, y: Y(w1) + 15, 'text-anchor': 'start', fill: ink, style: font }, 'measured'));
+    box.textContent = ''; box.appendChild(svg);
+  }
+
+  function step() {
+    var sex = $('s-sex').value, count = num('s-count');
+    if (!(count > 0)) { $('s-out').textContent = '–'; $('s-side').textContent = ''; $('s-work').textContent = ''; return; }
+    var hr = count * 4, rel = sex === 'm' ? 111.33 - 0.42 * hr : 65.81 - 0.1847 * hr;
+    $('s-out').textContent = f1(rel);
+    $('s-side').textContent = f1(rel / 3.5) + ' METs';
+    $('s-work').textContent = count + ' beats × 4 = ' + hr + ' bpm recovery HR. One beat miscounted would change the estimate by ' + f1(sex === 'm' ? 0.42 * 4 : 0.1847 * 4) + ' mL/kg/min.';
+  }
+
+  [['a-sex','a-age','a-mass','a-kp','a-hr'], ['y-age','y-mass','y-kp1','y-hr1','y-kp2','y-hr2'], ['s-sex','s-count']].forEach(function (ids, i) {
+    var fn = [astrand, ymca, step][i];
+    ids.forEach(function (id) { $(id).addEventListener('input', fn); });
+    fn();
+  });
+  var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(ymca, 120); });
+  if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ymca); } catch (e) {} }
+  new MutationObserver(ymca).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  var QUIZ = [
+    { q: 'During an Åstrand-Rhyming test, your partner\'s heart rate is 116 bpm at the end of minutes 5 and 6. What do you do?',
+      a: ['Use 116 in the nomogram', 'Raise the workload and ride another 6 minutes', 'End the test and record the client as highly fit'], c: 1,
+      why: 'The nomogram is only valid for a steady-state HR between 125 and 170 bpm. Below that, the HR to V̇O₂ relationship is less reliable, so you raise the workload and repeat.' },
+    { q: 'In the YMCA test, which assumption adds the most error for an individual client?',
+      a: ['That the bike is set to 50 rpm', 'That max heart rate equals 220 − age', 'That body mass was measured in kilograms'], c: 1,
+      why: 'Real max HR varies by 10 to 12 bpm either side of the age prediction, and the line is extended to that exact point.' },
+    { q: 'A client takes a beta blocker, which lowers heart rate during exercise. A heart-rate-based submax test will most likely:',
+      a: ['Overestimate their V̇O₂ max', 'Underestimate their V̇O₂ max', 'Be unaffected'], c: 0,
+      why: 'A lower HR at a given workload looks like higher fitness to the equations, so the estimate comes out too high.' },
+    { q: 'In the McArdle step test, your partner starts the 15-second pulse count 10 seconds late. The estimate will be:',
+      a: ['Too low', 'Too high', 'The same'], c: 1,
+      why: 'Heart rate is falling quickly during recovery. A late count gives a lower HR, and a lower recovery HR produces a higher estimate.' }
+  ];
+  var qbox = $('quiz');
+  QUIZ.forEach(function (item, qi) {
+    var d = document.createElement('div'); d.className = 'q';
+    var p = document.createElement('p'); p.textContent = (qi + 1) + '. ' + item.q; d.appendChild(p);
+    var fb = document.createElement('div'); fb.className = 'fb'; fb.hidden = true;
+    item.a.forEach(function (txt, ai) {
+      var b = document.createElement('button'); b.type = 'button'; b.id = 'q' + qi + 'a' + ai; b.textContent = txt;
+      b.addEventListener('click', function () {
+        d.querySelectorAll('button').forEach(function (x, xi) { x.classList.remove('wrong'); if (xi === item.c) x.classList.add('right'); });
+        if (ai !== item.c) b.classList.add('wrong');
+        fb.hidden = false; fb.textContent = (ai === item.c ? 'Correct. ' : 'Not quite. ') + item.why;
+      });
+      d.appendChild(b);
+    });
+    d.appendChild(fb); qbox.appendChild(d);
+  });
+})();
+</script>
+
+</html>
